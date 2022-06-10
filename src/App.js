@@ -18,57 +18,41 @@ function App() {
 
   const getOtherCountries = async () => {
     const response = await Axios.get(allCountries);
-    const randomNumber1 = Math.floor(Math.random() * response.data.length);
-    const country1 = response.data[randomNumber1];
-    const randomNumber2 = Math.floor(Math.random() * response.data.length);
-    const country2 = response.data[randomNumber2];
-    const randomNumber3 = Math.floor(Math.random() * response.data.length);
-    const country3 = response.data[randomNumber3];
-    const threeCountries = [country1, country2, country3];
-    setOtherCountries(threeCountries);
-    console.log(threeCountries);
-    // getAnswerChoices();
-    // const answerChoices = [country1.name.common, country2.name.common, country3.name.common, country.name.common];
-    // const shuffledAnswerChoices = shuffle(answerChoices);
-    // setAnswerChoices(shuffledAnswerChoices);
-    // console.log(otherCountries[1]);
-    // console.log(otherCountries[2]);
+    const otherCountries = response.data.filter(currCountry => currCountry.name.common !== country.name.common);
+    const shuffledAnswerChoices = otherCountries.sort(() => Math.random() - 0.5);
+    setOtherCountries(shuffledAnswerChoices.slice(0, 3));
   }
 
   const getAnswerChoices = () => {
     const answerChoices = [otherCountries[0].name.common, otherCountries[1].name.common, otherCountries[2].name.common, country.name.common];
-    const shuffledAnswerChoices = shuffle(answerChoices);
-    const sortedAnswerChoices = shuffledAnswerChoices.sort();
+    const sortedAnswerChoices = answerChoices.sort();
     setAnswerChoices(sortedAnswerChoices);
-    console.log(shuffledAnswerChoices); 
   }
 
-  const shuffle = (array) => {
-    let currentIndex = array.length, temporaryValue, randomIndex;
-    while (0 !== currentIndex) {
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex -= 1;
-      temporaryValue = array[currentIndex];
-      array[currentIndex] = array[randomIndex];
-      array[randomIndex] = temporaryValue;
-    }
-    return array;
-  }
+  // const shuffle = (array) => {
+  //   let currentIndex = array.length, temporaryValue, randomIndex;
+  //   while (0 !== currentIndex) {
+  //     randomIndex = Math.floor(Math.random() * currentIndex);
+  //     currentIndex -= 1;
+  //     temporaryValue = array[currentIndex];
+  //     array[currentIndex] = array[randomIndex];
+  //     array[randomIndex] = temporaryValue;
+  //   }
+  //   return array;
+  // }
 
   const selectAnswer = (answer) => {
     if(answer === country.name.common) {
       alert('Correct!');
     } else {
-      alert('Wrong!');
+      alert('Wrong! The correct answer is ' + country.name.common + '.');
     }
     getCountry();
-    getOtherCountries();
-    console.log(answer);
   }
 
   useEffect(() => {
     getCountry(); 
-    getOtherCountries();
+    //getOtherCountries();
   }, []);
 
   useEffect(() => {
@@ -77,9 +61,10 @@ function App() {
   }, [otherCountries]);
 
   // To ensure coutries are not the right answer
-  // useEffect(() => {
-  //   getOtherCountries();
-  // }, [country]);
+  useEffect(() => {
+    if(country === null) return;
+    getOtherCountries();
+  }, [country]);
 
   return (
     <div className="App">
