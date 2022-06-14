@@ -21,6 +21,8 @@ function App() {
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [page, setPage] = useState(1);
   const [counter, setCounter] = useState(1);
+  const [time, setTime] = useState(0);
+  const [running, setRunning] = useState(false);
   const allCountries = 'https://restcountries.com/v3.1/all';
 
   const getCountry = async () => {
@@ -43,14 +45,17 @@ function App() {
     setAnswerChoices(sortedAnswerChoices);
   }
 
-  const restart = () => {
+  const newGame = () => {
     setPage(2);
     setCounter(1);
     setCorrectAnswers(0);
+    setTime(0);
+    setRunning(true);
   }
 
   const selectAnswer = (answer) => {
     if (counter === 10) {
+      setRunning(false);
       setPage(3);
     }
     setCounter(counter + 1);
@@ -79,6 +84,18 @@ function App() {
     getOtherCountries();
   }, [country]);
 
+  useEffect(() => {
+    let interval;
+    if (running) {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 10);
+      }, 10);
+    } else if (!running) {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [running]);
+
   return (
     <div className="App">
       <header className="App-header">
@@ -89,7 +106,7 @@ function App() {
                 return (
                   <div>
                     <h1>Guess The Flag</h1>
-                    <button onClick={() => setPage(2)}>Start</button>
+                    <button onClick={() => newGame()}>Start</button>
                   </div>
                 )
               case 2:
@@ -100,6 +117,11 @@ function App() {
                         <div key={country}>
                           <h1>What is this country?</h1>
                           {/* <p>{country.name.common}</p> */}
+                          <div className='numbers'>
+                            <span>Time: {("0" + Math.floor((time / 60000) % 60)).slice(-2)}:</span>
+                            <span>{("0" + Math.floor((time / 1000) % 60)).slice(-2)}:</span>
+                            <span>{("0" + ((time / 10) % 100)).slice(-2)}</span>
+                          </div>
                           <p>Flag: {counter}/10</p>
                           <p>Capital: {country.capital}</p>
                           <p>Population: {country.population}</p>
@@ -128,8 +150,12 @@ function App() {
                 return (
                   <div>
                     <h1>Final Score</h1>
-                    <p>You got {correctAnswers}/10 correct!</p>
-                    <button onClick={() => restart()}>Play Again</button>
+                    <p>You got {correctAnswers}/10 correct in 
+                      <span> {("0" + Math.floor((time / 60000) % 60)).slice(-2)}:</span>
+                      <span>{("0" + Math.floor((time / 1000) % 60)).slice(-2)}:</span>
+                      <span>{("0" + ((time / 10) % 100)).slice(-2)}</span>
+                    !</p>
+                    <button onClick={() => newGame()}>Play Again</button>
                     <button onClick={() => setPage(1)}>Home</button>
                   </div>
                 )
