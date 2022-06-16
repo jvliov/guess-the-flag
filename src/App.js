@@ -15,7 +15,16 @@ function App() {
   //   return array;
   // }
 
-  const [country, setCountry] = useState();
+  const regions = [
+    { label: 'All Flags', value: 'ALL' },
+    { label: 'Europe', value: 'EU' },
+    { label: 'North & Central America', value: 'NA' },
+    { label: 'South America', value: 'SA' },
+    { label: 'Africa', value: 'AF' },
+    { label: 'Asia', value: 'AS' }
+  ];
+
+  const [country, setCountry] = useState(null);
   const [otherCountries, setOtherCountries] = useState(null);
   const [answerChoices, setAnswerChoices] = useState([]);
   const [correctAnswers, setCorrectAnswers] = useState(0);
@@ -23,20 +32,50 @@ function App() {
   const [counter, setCounter] = useState(1);
   const [time, setTime] = useState(0);
   const [running, setRunning] = useState(false);
+  const [region, setRegion] = useState('ALL');
+
   const allCountries = 'https://restcountries.com/v3.1/all';
+  const europeCountries = 'https://restcountries.com/v3.1/region/europe';
+  const northAmericaCountries = 'https://restcountries.com/v3.1/subregion/North%20America';
+  const centralAmericaCountries = 'https://restcountries.com/v3.1/subregion/Central%20America';
+  const southAmericaCountries = 'https://restcountries.com/v3.1/subregion/South%20America';
+  const africaCountries = 'https://restcountries.com/v3.1/region/africa';
+  const asiaCountries = 'https://restcountries.com/v3.1/region/asia';
 
   const getCountry = async () => {
-    const response = await Axios.get(allCountries);
-    const randomNumber = Math.floor(Math.random() * response.data.length);
-    setCountry(response.data[randomNumber]);
-    //console.log(response.data[randomNumber]);
+    // switch(region) {
+    //   case 'ALL':
+    //     const response = await Axios.get(allCountries);
+    //     break;
+    //   case 'EU':
+    const url = region === 'ALL' ? allCountries : region === 'EU' ? europeCountries : region === 'NA' ? northAmericaCountries : region === 'SA' ? southAmericaCountries : region === 'AF' ? africaCountries : asiaCountries;
+    const response = await Axios.get(url);
+    let countries = response.data;
+    let length = countries.length;
+    if(region === 'NA') {
+      const centralResponse = await Axios.get(centralAmericaCountries);
+      countries = [...countries, ...centralResponse.data];
+      length = countries.length;
+    }
+    const randomNumber = Math.floor(Math.random() * countries.length);
+    setCountry(countries[randomNumber]);
+    // console.log(countries);
   }
 
   const getOtherCountries = async () => {
-    const response = await Axios.get(allCountries);
-    const otherCountries = response.data.filter(currCountry => currCountry.name.common !== country.name.common);
+    const url = region === 'ALL' ? allCountries : region === 'EU' ? europeCountries : region === 'NA' ? northAmericaCountries : region === 'SA' ? southAmericaCountries : region === 'AF' ? africaCountries : asiaCountries;
+    const response = await Axios.get(url);
+    let countries = response.data;
+    let length = countries.length;
+    if(region === 'NA') {
+      const centralResponse = await Axios.get(centralAmericaCountries);
+      countries = [...countries, ...centralResponse.data];
+      length = countries.length;
+    }
+    const otherCountries = countries.filter(currCountry => currCountry.name.common !== country.name.common);
     const shuffledAnswerChoices = otherCountries.sort(() => Math.random() - 0.5);
     setOtherCountries(shuffledAnswerChoices.slice(0, 3));
+    // console.log(response.data);
   }
 
   const getAnswerChoices = () => {
@@ -46,6 +85,7 @@ function App() {
   }
 
   const newGame = () => {
+    getCountry();
     setPage(2);
     setCounter(1);
     setCorrectAnswers(0);
@@ -68,10 +108,10 @@ function App() {
     getCountry();
   }
 
-  useEffect(() => {
-    getCountry();
-    //getOtherCountries();
-  }, []);
+  // useEffect(() => {
+  //   getCountry();
+  //   //getOtherCountries();
+  // }, []);
 
   useEffect(() => {
     if (otherCountries === null) return;
@@ -106,6 +146,18 @@ function App() {
                 return (
                   <div>
                     <h1>Guess The Flag</h1>
+                    <div className="region-selector">
+                      <label>
+                        Select a region
+                        <select value={region} onChange={(e) => { setRegion(e.target.value); }}>
+                          {regions.map((region) => {
+                            return (
+                              <option value={region.value}>{region.label}</option>
+                            );
+                          })}
+                        </select>
+                      </label>
+                    </div>
                     <button onClick={() => newGame()}>Start</button>
                   </div>
                 )
@@ -113,9 +165,9 @@ function App() {
                 return (
                   <div>
                     {
-                      country !== undefined ?
+                      country !== null ?
                         <div key={country}>
-                          <h1>What is this country?</h1>
+                          <h1>What is this flag?</h1>
                           {/* <p>{country.name.common}</p> */}
                           <div className='numbers'>
                             <span>Time: {("0" + Math.floor((time / 60000) % 60)).slice(-2)}:</span>
@@ -150,11 +202,11 @@ function App() {
                 return (
                   <div>
                     <h1>Final Score</h1>
-                    <p>You got {correctAnswers}/10 correct in 
+                    <p>You got {correctAnswers}/10 correct in
                       <span> {("0" + Math.floor((time / 60000) % 60)).slice(-2)}:</span>
                       <span>{("0" + Math.floor((time / 1000) % 60)).slice(-2)}:</span>
                       <span>{("0" + ((time / 10) % 100)).slice(-2)}</span>
-                    !</p>
+                      !</p>
                     <button onClick={() => newGame()}>Play Again</button>
                     <button onClick={() => setPage(1)}>Home</button>
                   </div>
