@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Axios from 'axios';
 import './App.css';
+import Map from './Map.js';
 
 function App() {
   // const shuffle = (array) => {
@@ -159,6 +160,9 @@ function App() {
                       </label>
                     </div>
                     <button onClick={() => newGame()}>Start</button>
+                    <div>
+                      <button onClick={() => setPage(4)}>Find The Countries</button>
+                    </div>
                   </div>
                 )
               case 2:
@@ -209,6 +213,13 @@ function App() {
                       !</p>
                     <button onClick={() => newGame()}>Play Again</button>
                     <button onClick={() => setPage(1)}>Home</button>
+                  </div>
+                )
+              case 4:
+                return (
+                  <div>
+                    <h1>Find The Countries</h1>
+                    <Map />
                   </div>
                 )
             }
