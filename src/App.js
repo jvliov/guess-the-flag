@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import Axios from 'axios';
 import './App.css';
+import './Map.css';
 import Map from './Map.js';
+import World from "@svg-maps/world";
+import { SVGMap } from "react-svg-map";
 
 function App() {
   // const shuffle = (array) => {
@@ -220,6 +223,7 @@ function App() {
                   <div>
                     <h1>Find The Countries</h1>
                     <Map />
+                    <button onClick={() => setPage(1)}>Home</button>
                   </div>
                 )
             }
